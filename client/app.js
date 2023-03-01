@@ -1,3 +1,8 @@
+const socket = io();
+
+socket.on('message', ({ author, content }) => addMessage(author, content));
+socket.on('message', ({ name, id }) => login(name, id));
+
 const loginForm = document.querySelector('#welcome-form');
 const messagesSection = document.querySelector('#messages-section');
 const messagesList = document.querySelector('#messages-list');
@@ -9,10 +14,14 @@ let userName = '';
 
 const login = e => {
   e.preventDefault();
-  if(userNameInput.value.length == 0){
+
+  let newUser = userNameInput.value;
+
+  if(!newUser.length){
     alert('Please enter a username');
   } else {
-    userName = userNameInput.value;
+    userName = newUser;
+    socket.emit('join', { name: userName, id: socket.id });
     loginForm.classList.remove('show');
     messagesSection.classList.add('show');
   }
@@ -34,10 +43,14 @@ const addMessage = (author, content) => {
 
 const sendMessage = e => {
   e.preventDefault();
-  if(messageContentInput.value.length == 0){
+
+  let messageContent = messageContentInput.value;
+
+  if(!messageContent.length){
     alert('Please enter a message');
   } else {
-    addMessage(userName, messageContentInput.value);
+    addMessage(userName, messageContent);
+    socket.emit('message', { author: userName, content: messageContent });
     messageContentInput.value = '';
   }
 };
